@@ -1,0 +1,239 @@
+/* ================= RESET & BASE ================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+.login-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+/* ================= SISI KIRI (SLIDESHOW) - 70% Desktop ================= */
+.login-left-panel {
+  width: 70%; /* Lebar 70% di Desktop */
+  position: relative;
+  background-color: #111827;
+}
+
+.slideshow-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-color: #111827;
+}
+
+.slideshow-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.2s ease-in-out, visibility 1.2s;
+  z-index: 1;
+}
+
+.slideshow-image.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 2;
+}
+
+.slideshow-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 60px 40px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 70%, rgba(0, 0, 0, 0) 100%);
+  color: #ffffff;
+  z-index: 3;
+}
+
+.slideshow-overlay h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.slideshow-overlay p {
+  font-size: 1rem;
+  opacity: 0.85;
+  line-height: 1.5;
+  max-width: 500px;
+}
+
+/* Slideshow Dots */
+.slideshow-dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.dot.active {
+  background-color: #ffffff;
+  width: 28px;
+  border-radius: 4px;
+}
+
+/* ================= SISI KANAN (FORM LOGIN) - 30% Desktop ================= */
+.login-right-panel {
+  width: 30%; /* Lebar form login di-lock 30% di Desktop */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: #ffffff;
+}
+
+.form-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-header h1 {
+  font-size: 2rem;
+  color: #111827;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.form-header p {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 32px;
+}
+
+/* Form Inputs */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #111827;
+  background-color: #f9fafb;
+  transition: all 0.2s ease;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #2563eb;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+/* Actions & Buttons */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.forgot-link {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  background-color: #111827;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 10px;
+}
+
+.btn-login:hover {
+  background-color: #1f2937;
+}
+
+.form-footer {
+  margin-top: 48px;
+  text-align: center;
+  font-size: 0.825rem;
+  color: #9ca3af;
+}
+
+/* ================= RESPONSIVE DESIGN (MOBILE VIEW) ================= */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column; /* Mengubah susunan menjadi atas-bawah */
+  }
+
+  .login-left-panel {
+    display: block;
+    width: 100%;
+    height: 30vh; /* Slideshow mengambil 30% tinggi layar HP */
+  }
+
+  .login-right-panel {
+    width: 100%;
+    height: 70vh; /* Form login mengambil sisa 70% tinggi layar HP */
+    padding: 24px;
+    align-items: flex-start; /* Menggeser form sedikit ke atas agar nyaman di HP */
+    overflow-y: auto; /* Mencegah form terpotong jika layar HP terlalu pendek */
+  }
+
+  .slideshow-overlay {
+    display: none; /* Menyembunyikan teks overlay & dots di tampilan HP */
+  }
+}

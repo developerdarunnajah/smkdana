@@ -3,7 +3,9 @@
 	"name": "smkdana",
 	"main": "./src/worker/index.ts",
 	"compatibility_date": "2025-10-08",
-	"compatibility_flags": ["nodejs_compat"],
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
 	"observability": {
 		"enabled": true
 	},
@@ -11,5 +13,20 @@
 	"assets": {
 		"directory": "./dist/client",
 		"not_found_handling": "single-page-application"
-	}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "formal1_db",
+			"database_id": "a9f51f95-c732-4ad9-9960-55bded33361c",
+			"remote": true
+		}
+	],
+	"r2_buckets": [
+		{
+			"bucket_name": "formal1-bucket",
+			"binding": "BUCKET",
+			"remote": true
+		}
+	]
 }
