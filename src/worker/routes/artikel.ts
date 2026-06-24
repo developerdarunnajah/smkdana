@@ -8,15 +8,15 @@ artikel.post("/", async (c) => {
     const body = await c.req.parseBody();
     
     const judul_artikel = body['judul_artikel'] as string;
-    const jenis_artikel = parseInt(body['jenis_artikel'] as string);
+    const jenis_artikel_id = parseInt(body['jenis_artikel_id'] as string); // Disesuaikan dengan schema baru
     const pengguna_id = parseInt(body['pengguna_id'] as string); // Didapat dari frontend
     const baris_count = parseInt(body['baris_count'] as string);
     
     // 2. Simpan Data Utama Artikel ke Database D1
     const insertArtikel = await c.env.DB.prepare(
-      "INSERT INTO artikel (judul_artikel, jenis_artikel, pengguna_id, status) VALUES (?, ?, ?, 'publish')"
+      "INSERT INTO artikel (judul_artikel, jenis_artikel_id, pengguna_id, status) VALUES (?, ?, ?, 'publish')"
     )
-    .bind(judul_artikel, jenis_artikel, pengguna_id)
+    .bind(judul_artikel, jenis_artikel_id, pengguna_id)
     .run();
     
     // Ambil ID artikel yang baru saja dibuat
@@ -75,13 +75,18 @@ artikel.post("/", async (c) => {
     return c.json({ success: false, message: "Terjadi kesalahan server: " + error.message }, 500);
   }
 });
+
 // Endpoint GET (Untuk membaca artikel yang sudah di-publish berdasarkan ID)
 artikel.get("/:id", async (c) => {
   const id = c.req.param("id");
   try {
-    // Mengambil data utama artikel
+    // Mengambil data utama artikel beserta nama penulis dan nama jenis artikel
     const dataArtikel = await c.env.DB.prepare(
-      "SELECT a.*, p.nama_lengkap AS penulis FROM artikel a LEFT JOIN pengguna p ON a.pengguna_id = p.pengguna_id WHERE a.artikel_id = ?"
+      `SELECT a.*, p.nama_lengkap AS penulis, j.nama_jenis_artikel 
+       FROM artikel a 
+       LEFT JOIN pengguna p ON a.pengguna_id = p.pengguna_id 
+       LEFT JOIN jenis_artikel j ON a.jenis_artikel_id = j.jenis_artikel_id 
+       WHERE a.artikel_id = ?`
     ).bind(id).first();
     
     if (!dataArtikel) {
@@ -94,6 +99,23 @@ artikel.get("/:id", async (c) => {
     ).bind(id).all();
     
     return c.json({ success: true, data: { ...dataArtikel, blocks: baris } });
+  } catch (error: any) {
+    return c.json({ success: false, message: "Terjadi kesalahan server: " + error.message }, 500);
+  }
+});
+// Endpoint untuk mengambil semua artikel (publish & draft) khusus milik pengguna tertentu
+artikel.get("/user/:pengguna_id", async (c) => {
+  const pengguna_id = c.req.param("pengguna_id");
+  try {
+    const { results } = await c.env.DB.prepare(
+      `SELECT a.*, j.nama_jenis_artikel 
+       FROM artikel a 
+       LEFT JOIN jenis_artikel j ON a.jenis_artikel_id = j.jenis_artikel_id 
+       WHERE a.pengguna_id = ? 
+       ORDER BY a.tanggal_dibuat DESC`
+    ).bind(pengguna_id).all();
+    
+    return c.json({ success: true, data: results });
   } catch (error: any) {
     return c.json({ success: false, message: "Terjadi kesalahan server: " + error.message }, 500);
   }

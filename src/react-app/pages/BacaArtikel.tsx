@@ -37,9 +37,11 @@ const BacaArtikel: React.FC = () => {
       <div className="reader-content">
         <h1 className="reader-title">{artikel.judul_artikel}</h1>
         <div className="reader-meta">
-          <span>{artikel.penulis ? `Ditulis oleh: ${artikel.penulis}` : "Mode Pratinjau (Preview)"}</span>
-          {artikel.tanggal_dibuat && <span> • {new Date(artikel.tanggal_dibuat).toLocaleDateString('id-ID')}</span>}
-        </div>
+  <span>{artikel.penulis ? `Ditulis oleh: ${artikel.penulis}` : "Mode Pratinjau (Preview)"}</span>
+  {/* Tambahan untuk menampilkan jenis artikel secara dinamis */}
+  {artikel.nama_jenis_artikel && <span className="reader-category"> • Kategori: {artikel.nama_jenis_artikel}</span>}
+  {artikel.tanggal_dibuat && <span> • {new Date(artikel.tanggal_dibuat).toLocaleDateString('id-ID')}</span>}
+</div>
         
         <div className="reader-body">
           {artikel.blocks.map((block: any, idx: number) => {

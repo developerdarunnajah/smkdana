@@ -57,3 +57,41 @@ CREATE TABLE baris (
     urutan INTEGER NOT NULL,                           -- Urutan tampil blok (1, 2, 3, dst)
     FOREIGN KEY (artikel_id) REFERENCES artikel(artikel_id) ON DELETE CASCADE
 );
+
+-- Hapus tabel lama jika sudah ada (sesuaikan urutan untuk menghindari error foreign key)
+DROP TABLE IF EXISTS baris;
+DROP TABLE IF EXISTS artikel;
+DROP TABLE IF EXISTS jenis_artikel; -- Tabel baru
+
+-- (Tabel nama_lembaga dan pengguna diasumsikan sudah ada di atas baris ini sesuai schema awal)
+
+-- Buat tabel jenis_artikel
+CREATE TABLE IF NOT EXISTS jenis_artikel (
+    jenis_artikel_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nama_jenis_artikel TEXT NOT NULL UNIQUE
+);
+
+-- Buat ulang tabel artikel
+CREATE TABLE artikel (
+    artikel_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    judul_artikel TEXT NOT NULL,
+    jenis_artikel_id INTEGER,                          -- Menggantikan kolom jenis_artikel sebelumnya
+    pengguna_id INTEGER,
+    lembaga_id INTEGER,
+    tanggal_dibuat DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status TEXT DEFAULT 'draft',
+    FOREIGN KEY (jenis_artikel_id) REFERENCES jenis_artikel(jenis_artikel_id) ON DELETE SET NULL,
+    FOREIGN KEY (pengguna_id) REFERENCES pengguna(pengguna_id) ON DELETE SET NULL,
+    FOREIGN KEY (lembaga_id) REFERENCES nama_lembaga(lembaga_id) ON DELETE CASCADE
+);
+
+-- Buat tabel baris (Tetap sama seperti sebelumnya)
+CREATE TABLE baris (
+    baris_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    isi TEXT,                                          
+    foto TEXT,                                         
+    deskripsi_foto TEXT,                               
+    artikel_id INTEGER,
+    urutan INTEGER NOT NULL,                           
+    FOREIGN KEY (artikel_id) REFERENCES artikel(artikel_id) ON DELETE CASCADE
+);
