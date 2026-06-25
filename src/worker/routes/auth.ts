@@ -7,7 +7,7 @@ auth.post("/login", async (c) => {
   
   const body = await c.req.json();
   const { username, password } = body;
-  const usernameFix = username.trim().toLowerCase();
+  const usernameFix = (username || "").trim().toLowerCase();
   if (!username || !password) {
   return c.json({
     success: false,
@@ -29,7 +29,6 @@ auth.post("/login", async (c) => {
     LIMIT 1
 `)
 
-    .bind(username, password)
     .bind(usernameFix, password)
     .first(); // .first() mengambil satu baris data saja
     
