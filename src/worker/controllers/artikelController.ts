@@ -13,8 +13,14 @@ export const createArtikel = async (c: Context<{ Bindings: Env }>) => {
     
     const judul_artikel = body['judul_artikel'] as string;
     const jenis_artikel_id = parseInt(body['jenis_artikel_id'] as string);
-    const pengguna_id = parseInt(body['pengguna_id'] as string);
     const baris_count = parseInt(body['baris_count'] as string);
+    
+    // AMAN: Mengambil ID pengguna langsung dari token JWT yang sudah terverifikasi
+    const jwtPayload = c.get("jwtPayload") as { uid: number } | undefined;
+    if (!jwtPayload || !jwtPayload.uid) {
+      return c.json({ success: false, message: "Akses ditolak: Sesi tidak valid atau Anda belum login." }, 401);
+    }
+    const pengguna_id = jwtPayload.uid;
     
     // Simpan Data Utama Artikel ke Database D1
     const insertArtikel = await c.env.DB.prepare(
@@ -23,7 +29,15 @@ export const createArtikel = async (c: Context<{ Bindings: Env }>) => {
     .bind(judul_artikel, jenis_artikel_id, pengguna_id)
     .run();
     
-    const artikel_id = insertArtikel.meta.last_row_id;
+    // Memeriksa kedua kemungkinan format nama properti dari Cloudflare D1
+    const artikel_id = insertArtikel.meta.last_row_id ?? (insertArtikel.meta as any).lastRowId;
+
+    // Membantu pelacakan ID pada terminal konsol backend
+    console.log("Artikel Berhasil Disimpan. ID:", artikel_id);
+    
+    if (!artikel_id) {
+      return c.json({ success: false, message: "Gagal membuat ID referensi artikel pada database." }, 500);
+    }
     const barisQueries = [];
     
     for (let i = 0; i < baris_count; i++) {
@@ -39,13 +53,30 @@ export const createArtikel = async (c: Context<{ Bindings: Env }>) => {
         deskripsi_foto = body[`baris_${i}_deskripsi_foto`] as string;
         const file = body[`baris_${i}_file`] as File;
         
-        // Upload ke R2 Bucket
+        // Mulai Proses Upload & Validasi Keamanan
         if (file && file.name) {
-          const uniqueFilename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+          
+          // 1. Validasi Ekstensi / MIME Type (Hanya izinkan gambar)
+          const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+          if (!allowedTypes.includes(file.type)) {
+            // Hentikan proses jika ada file jahat/tidak sesuai
+            return c.json({ success: false, message: `Gagal: File "${file.name}" bukan format gambar yang diizinkan (Hanya JPG, PNG, WEBP, GIF).` }, 400);
+          }
+
+          // 2. Validasi Ukuran File (Contoh: Maksimal 5MB)
+          const MAX_SIZE = 5 * 1024 * 1024; // 5MB dalam satuan Bytes
+          if (file.size > MAX_SIZE) {
+            return c.json({ success: false, message: `Gagal: Ukuran gambar "${file.name}" terlalu besar. Maksimal 5MB.` }, 400);
+          }
+
+          // 3. Sanitasi Nama File (Mencegah Path Traversal pada nama file asal)
+          const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '-');
+          const uniqueFilename = `${Date.now()}-${safeFileName}`;
           const key = `resource/${uniqueFilename}`; 
           
+          // 4. Upload ke R2 Bucket dengan aman
           await c.env.BUCKET.put(key, await file.arrayBuffer(), {
-            httpMetadata: { contentType: file.type }
+            httpMetadata: { contentType: file.type } // Memastikan browser merender sebagai gambar, bukan mengunduhnya
           });
           foto = key; 
         }
@@ -92,9 +123,13 @@ export const getArtikelById = async (c: Context<{ Bindings: Env }>) => {
 };
 
 // 3. Fungsi untuk Mendapatkan List Artikel Milik User (GET)
+// 3. Fungsi untuk Mendapatkan List Artikel Milik User (GET)
 export const getArtikelByUser = async (c: Context<{ Bindings: Env }>) => {
-  const pengguna_id = c.req.param("pengguna_id");
   try {
+    // AMAN: Mengambil ID pengguna dari token JWT, bukan dari parameter URL
+    const jwtPayload = c.get("jwtPayload") as { uid: number };
+    const pengguna_id = jwtPayload.uid;
+
     const { results } = await c.env.DB.prepare(
       `SELECT a.*, j.nama_jenis_artikel 
        FROM artikel a 

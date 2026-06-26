@@ -36,11 +36,14 @@ auth.post("/login", async (c) => {
     if (user) {
       // Jika pengguna ditemukan, buat payload JWT (Tanpa sistem role)
       const payload = {
-  uid: user.pengguna_id,
-  exp: Math.floor(Date.now() / 1000) + 86400
-};
+        uid: user.pengguna_id,           // Dibutuhkan oleh Backend (artikelController)
+        pengguna_id: user.pengguna_id,   // Dibutuhkan oleh Frontend (useAuth.ts)
+        nama_lengkap: user.nama_lengkap, // Menampilkan nama di pojok kanan atas
+        username: user.username,
+        exp: Math.floor(Date.now() / 1000) + 86400
+      };
       
-      const secret = "rahasia-super-aman-smkdana"; // Kunci rahasia JWT
+      const secret = c.env.JWT_SECRET;
       
       const token = await sign(payload, secret);
 

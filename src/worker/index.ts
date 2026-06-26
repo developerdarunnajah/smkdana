@@ -1,19 +1,31 @@
 import { Hono } from "hono";
+import { jwt } from "hono/jwt"; // 1. Import middleware JWT bawaan Hono
 import auth from "./routes/auth";
 import slide from "./routes/slide";
-import artikel from "./routes/artikel";
-import draft from "./routes/draft";       // Import baru
-import preview from "./routes/preview";   // Import baru
-import jenisArtikel from "./routes/jenisartikel"; // Tambahan untuk jenis artikel
+import artikelRoute from "./routes/artikel";
+import draft from "./routes/draft";       
+import preview from "./routes/preview";   
+import jenisArtikel from "./routes/jenisartikel"; 
 
 const app = new Hono<{ Bindings: Env }>();
 
 app.route("/api/auth", auth);
+
+// 2. Pasang proteksi JWT untuk semua rute artikel dan draft
+// Hanya token valid yang diizinkan lewat, jika tidak valid Hono otomatis mengembalikan error 401
+// 2. Pasang proteksi JWT untuk semua rute artikel dan draft (Tepat untuk URL dengan atau tanpa garis miring)
+app.use("/api/artikel", (c, next) => jwt({ secret: c.env.JWT_SECRET, alg: "HS256" })(c, next));
+app.use("/api/artikel/*", (c, next) => jwt({ secret: c.env.JWT_SECRET, alg: "HS256" })(c, next));
+
+app.use("/api/draft", (c, next) => jwt({ secret: c.env.JWT_SECRET, alg: "HS256" })(c, next));
+app.use("/api/draft/*", (c, next) => jwt({ secret: c.env.JWT_SECRET, alg: "HS256" })(c, next));
+
+// Jalur rute utama (Sekarang sudah terproteksi oleh middleware di atas)
 app.route("/api/slide", slide);
-app.route("/api/artikel", artikel);
-app.route("/api/draft", draft);           // Route baru
-app.route("/api/preview", preview);       // Route baru
-app.route("/api/jenis-artikel", jenisArtikel); // Route baru
+app.route("/api/artikel",  artikelRoute); // Gunakan artikelRoute yang sudah diimpor dari routes/artikel.ts
+app.route("/api/draft", draft);           
+app.route("/api/preview", preview);       
+app.route("/api/jenis-artikel", jenisArtikel);
 
 // ... (Sisa kode get/resource biarkan sama)
 // OPSI TAMBAHAN: Buat endpoint agar frontend bisa membaca gambar dari folder resource

@@ -1,40 +1,44 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
 
 export const useAuth = () => {
-  const navigate = useNavigate();
+  const [penggunaId, setPenggunaId] = useState<number | null>(null);
+  const [namaLengkap, setNamaLengkap] = useState<string>("");
   const [namaPengguna, setNamaPengguna] = useState<string>("");
-  const [penggunaId, setPenggunaId] = useState<number>(0);
-  const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("jwt_token");
-    if (!token) {
-      navigate("/login");
-      return;
+    const token = localStorage.getItem('jwt_token');
+    
+    if (token) {
+      try {
+        // Memecah token JWT dan mengambil bagian payload (tengah)
+        const payloadBase64 = token.split('.')[1];
+        const decodedJson = atob(payloadBase64);
+        const payload = JSON.parse(decodedJson);
+        
+        // Memasukkan data dari token ke dalam state React
+        setPenggunaId(payload.uid || payload.pengguna_id);
+        setNamaLengkap(payload.nama_lengkap || "Pengguna");
+        setNamaPengguna(payload.username || "");
+      } catch (error) {
+        console.error("Token tidak valid atau rusak", error);
+        localStorage.removeItem('jwt_token'); // Hapus token jika rusak
+      }
     }
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-
-      const decodedToken = JSON.parse(jsonPayload);
-      setNamaPengguna(decodedToken.nama_lengkap || decodedToken.username);
-      setPenggunaId(decodedToken.pengguna_id);
-    } catch (error) {
-      localStorage.removeItem("jwt_token");
-      navigate("/login");
-    } finally {
-      setIsAuthLoading(false);
-    }
-  }, [navigate]);
+    
+    setIsAuthLoading(false);
+  }, []);
 
   const logout = () => {
-    localStorage.removeItem("jwt_token");
-    navigate("/login");
+    localStorage.removeItem('jwt_token');
+    window.location.href = '/login'; 
   };
 
-  return { namaPengguna, penggunaId, isAuthLoading, logout };
+  return { 
+    penggunaId, 
+    namaLengkap, 
+    namaPengguna, 
+    isAuthLoading, 
+    logout 
+  };
 };
