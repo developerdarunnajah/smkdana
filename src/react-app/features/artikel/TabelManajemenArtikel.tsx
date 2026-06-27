@@ -22,19 +22,29 @@ const TabelManajemenArtikel: React.FC = () => {
 
   const fetchArtikel = () => {
     if (!penggunaId) return;
-    const token = localStorage.getItem("jwt_token");
+    const token = sessionStorage.getItem("jwt_token");
     
-    fetch(`/api/artikel/user/${penggunaId}`, {
+    fetch(`/api/artikel/saya/semua?t=${new Date().getTime()}`, {
       method: 'GET',
-      headers: { "Authorization": `Bearer ${token}` }
+      // 'no-store' secara native memaksa browser mengabaikan semua jenis cache HTTP
+      cache: 'no-store', 
+      headers: { 
+        "Authorization": `Bearer ${token}`,
+        // Memaksa proxy/CDN (seperti Cloudflare) untuk melewatinya
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
+      }
     })
       .then(res => res.json())
       .then(data => {
-        if (data.success) setListArtikel(data.data);
+        if (data.success) {
+            setListArtikel(data.data);
+        }
         setLoadingArtikel(false);
       })
       .catch(err => {
-        console.error(err);
+        console.error("Gagal mengambil data:", err);
         setLoadingArtikel(false);
       });
   };
@@ -58,7 +68,7 @@ const TabelManajemenArtikel: React.FC = () => {
 
   const toggleStatus = async (artikel_id: number, currentStatus: string) => {
     const newStatus = currentStatus === 'publish' ? 'draft' : 'publish';
-    const token = localStorage.getItem("jwt_token");
+    const token = sessionStorage.getItem("jwt_token");
 
     try {
       const res = await fetch(`/api/artikel/update-status/${artikel_id}`, {
@@ -84,7 +94,7 @@ const TabelManajemenArtikel: React.FC = () => {
 
   const handlePreview = async (artikel_id: number) => {
     try {
-      const token = localStorage.getItem("jwt_token");
+      const token = sessionStorage.getItem("jwt_token");
       const res = await fetch(`/api/artikel/${artikel_id}`, {
         method: 'GET',
         headers: { "Authorization": `Bearer ${token}` }
@@ -99,7 +109,7 @@ const TabelManajemenArtikel: React.FC = () => {
           blocks: data.data.blocks || []
         };
         
-        localStorage.setItem("preview_artikel", JSON.stringify(previewData));
+        sessionStorage.setItem("preview_artikel", JSON.stringify(previewData));
         window.open("/artikel/preview", "_blank");
       } else {
         alert("Gagal memuat data preview dari server: " + (data.message || "Artikel tidak ditemukan"));
@@ -127,7 +137,7 @@ const TabelManajemenArtikel: React.FC = () => {
         <input 
           type="text" 
           className="form-control" 
-          placeholder="🔍 Cari judul atau kategori..." 
+          placeholder="Cari judul atau kategori..." 
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -191,14 +201,14 @@ const TabelManajemenArtikel: React.FC = () => {
                         onClick={() => handlePreview(art.artikel_id)}
                         title="Lihat Preview"
                       >
-                        👁️ Preview
+                        Preview
                       </button>
                       <button 
                         className="btn btn-secondary" 
                         style={{ padding: '6px 12px', fontSize: '0.75rem', cursor: 'pointer' }}
                         onClick={() => toggleStatus(art.artikel_id, art.status)}
                       >
-                        {art.status === 'publish' ? '↓ Jadikan Draft' : '↑ Publish'}
+                        {art.status === 'publish' ? 'Jadikan Draft' : 'Publish'}
                       </button>
                     </div>
                   </td>

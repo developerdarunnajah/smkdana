@@ -8,7 +8,7 @@ export const useAuth = () => {
   const [isAuthLoading, setIsAuthLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("jwt_token");
+    const token = sessionStorage.getItem("jwt_token");
     if (!token) {
       navigate("/login");
       return;
@@ -24,7 +24,7 @@ export const useAuth = () => {
       setNamaPengguna(decodedToken.nama_lengkap || decodedToken.username);
       setPenggunaId(decodedToken.pengguna_id);
     } catch (error) {
-      localStorage.removeItem("jwt_token");
+      sessionStorage.removeItem("jwt_token");
       navigate("/login");
     } finally {
       setIsAuthLoading(false);
@@ -32,7 +32,7 @@ export const useAuth = () => {
   }, [navigate]);
 
   const logout = () => {
-    localStorage.removeItem("jwt_token");
+    sessionStorage.removeItem("jwt_token");
     navigate("/login");
   };
 

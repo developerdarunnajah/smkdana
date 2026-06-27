@@ -7,7 +7,7 @@ export const useAuth = () => {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('jwt_token');
+    const token = sessionStorage.getItem('jwt_token');
     
     if (token) {
       try {
@@ -22,7 +22,7 @@ export const useAuth = () => {
         setNamaPengguna(payload.username || "");
       } catch (error) {
         console.error("Token tidak valid atau rusak", error);
-        localStorage.removeItem('jwt_token'); // Hapus token jika rusak
+        sessionStorage.removeItem('jwt_token'); // Hapus token jika rusak
       }
     }
     
@@ -30,7 +30,7 @@ export const useAuth = () => {
   }, []);
 
   const logout = () => {
-    localStorage.removeItem('jwt_token');
+    sessionStorage.removeItem('jwt_token');
     window.location.href = '/login'; 
   };
 

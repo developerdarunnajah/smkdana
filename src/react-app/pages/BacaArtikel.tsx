@@ -10,7 +10,7 @@ const BacaArtikel: React.FC = () => {
   useEffect(() => {
     // LOGIKA 1: Jika URL-nya adalah /artikel/preview (Tab Baru untuk Preview)
     if (id === 'preview') {
-      const previewData = localStorage.getItem("preview_artikel");
+      const previewData = sessionStorage.getItem("preview_artikel");
       if (previewData) setArtikel(JSON.parse(previewData));
       setLoading(false);
       return;

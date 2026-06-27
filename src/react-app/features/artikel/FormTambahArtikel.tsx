@@ -12,7 +12,8 @@ const FormTambahArtikel: React.FC = () => {
   const [barisList, setBarisList] = useState<any[]>([]);
 
   useEffect(() => {
-    const token = localStorage.getItem("jwt_token");
+    // PERBAIKAN: Mengambil token dari sessionStorage
+    const token = sessionStorage.getItem("jwt_token");
     fetch("/api/jenis-artikel", {
       headers: { "Authorization": `Bearer ${token}` }
     })
@@ -36,6 +37,7 @@ const FormTambahArtikel: React.FC = () => {
   const hapusBaris = (index: number) => {
     setBarisList(barisList.filter((_, i) => i !== index));
   };
+  
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -44,7 +46,6 @@ const FormTambahArtikel: React.FC = () => {
       reader.onerror = error => reject(error);
     });
   };
-  
 
   const handleAction = async (actionType: 'publish' | 'draft' | 'preview') => {
     if (!judulArtikel || !jenisArtikelId) {
@@ -60,12 +61,11 @@ const FormTambahArtikel: React.FC = () => {
         return { urutan: index + 1, tipe: blok.tipe, isi: blok.isi, foto: base64Foto, deskripsi_foto: blok.deskripsi_foto };
       }));
 
+      // Preview tetap menggunakan localStorage karena hanya sebagai penyimpanan data tampilan sementara
       localStorage.setItem("preview_artikel", JSON.stringify({ judul_artikel: judulArtikel, blocks: previewBlocks }));
       window.open("/artikel/preview", "_blank"); 
       return;
     }
-
-    // ... (lanjutkan ke logika publish/draft yang sudah ada)
 
     const formData = new FormData();
     formData.append('judul_artikel', judulArtikel);
@@ -83,7 +83,8 @@ const FormTambahArtikel: React.FC = () => {
     });
 
     try {
-      const token = localStorage.getItem("jwt_token");
+      // PERBAIKAN: Mengambil token dari sessionStorage untuk autentikasi API
+      const token = sessionStorage.getItem("jwt_token");
       const response = await fetch(actionType === 'draft' ? "/api/draft" : "/api/artikel", {
         method: 'POST',
         headers: { "Authorization": `Bearer ${token}` },
@@ -113,12 +114,12 @@ const FormTambahArtikel: React.FC = () => {
           className="form-control" 
           value={judulArtikel} 
           onChange={e => setJudulArtikel(e.target.value)} 
-          placeholder="Tuliskan judul artikel yang menarik..." 
+          placeholder="Tuliskan judul artikel..." 
         />
       </div>
 
       <div className="form-group">
-        <label>Kategori Artikel</label>
+        <label>Kategori</label>
         <select 
           className="form-control" 
           value={jenisArtikelId} 
@@ -183,7 +184,7 @@ const FormTambahArtikel: React.FC = () => {
         ))}
       </div>
 
-<div className="form-actions">
+      <div className="form-actions">
         <button type="button" className="btn btn-secondary" onClick={() => handleAction('preview')}>Preview</button>
         <button type="button" className="btn btn-secondary" onClick={() => handleAction('draft')}>Draft</button>
         <button type="button" className="btn btn-primary" onClick={() => handleAction('publish')}>Publish</button>

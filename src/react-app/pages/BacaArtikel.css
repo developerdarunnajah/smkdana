@@ -45,11 +45,14 @@
   text-align: center;
 }
 
+/* Memastikan gambar dalam artikel tidak jebol/melewati layar */
 .reader-image-box img {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 0 auto;
 }
 
 .reader-caption {
@@ -60,7 +63,33 @@
   font-style: italic;
 }
 
-@media (max-width: 768px) {
-  .reader-content { padding: 24px; }
-  .reader-title { font-size: 2rem; }
+/* ================= BACA ARTIKEL MOBILE RESPONSIVE ================= */
+@media screen and (max-width: 768px) {
+  .reader-container {
+    padding: 16px 12px;
+  }
+
+  .reader-content {
+    padding: 24px 20px;
+    border-radius: 12px;
+  }
+
+  .reader-title {
+    font-size: 1.75rem;
+    margin-bottom: 12px;
+  }
+
+  .reader-meta {
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+
+  .reader-text {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
 }

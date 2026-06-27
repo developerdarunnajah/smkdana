@@ -11,19 +11,19 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-container">
       <aside className="sidebar">
-        <div className="sidebar-header">SMK Dana</div>
+        <div className="sidebar-header">Jurnalis</div>
         <nav className="sidebar-nav">
           <div 
             className={`nav-item ${activeTab === 'tulis' ? 'active' : ''}`}
             onClick={() => setActiveTab('tulis')}
           >
-            Tulis Artikel
+            Tambah Artikel
           </div>
           <div 
             className={`nav-item ${activeTab === 'manajemen' ? 'active' : ''}`}
             onClick={() => setActiveTab('manajemen')}
           >
-            Manajemen Artikel
+            Artikel List
           </div>
         </nav>
       </aside>
@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
 
         <div className="content-area">
           <div className="view-card">
-            <h3>{activeTab === 'tulis' ? 'Tulis Artikel Baru' : 'Manajemen Artikel'}</h3>
+            <h3>{activeTab === 'tulis' ? 'Tulis Artikel Baru' : 'Artikel List'}</h3>
             {activeTab === 'tulis' ? <FormTambahArtikel /> : <TabelManajemenArtikel />}
           </div>
         </div>

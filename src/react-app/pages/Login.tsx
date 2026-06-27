@@ -14,7 +14,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     // Jika sudah ada token, langsung arahkan ke dashboard
-    if (localStorage.getItem("jwt_token")) {
+    if (sessionStorage.getItem("jwt_token")) {
       navigate("/dashboard");
     }
 
@@ -38,8 +38,9 @@ const handleLogin = async (e: React.FormEvent) => {
       const data = await response.json();
 
       if (data.success) {
-        // Simpan JWT ke localStorage browser
-        localStorage.setItem("jwt_token", data.token);
+        // Simpan JWT ke sessionStorage browser
+        // Saat login berhasil
+sessionStorage.setItem("jwt_token", data.token);
         // Arahkan ke halaman dashboard
         navigate("/dashboard");
       } else {
